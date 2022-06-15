@@ -19,13 +19,13 @@
                         <table width="100%">
                             <thead>
                                 <tr>
-                                    <td width="9%">Tài khoản</td>
+                                    <td width="10%">Tài khoản</td>
                                     <td width="15%">Tên cán bộ</td>
-                                    <td width="7%">Ngày sinh</td>
+                                    <td width="7.5%">Ngày sinh</td>
                                     <td width="25%">Địa chỉ</td>
-                                    <td width="9%">Điện thoại</td>
+                                    <td width="10%">Điện thoại</td>
                                     <td width="15%">Email</td>
-                                    <td width="20%">Tùy chỉnh</td>
+                                    <td width="17.5%">Tùy chỉnh</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -39,7 +39,7 @@
                                     <td>{{ $account->phone }}</td>
                                     <td>{{ $account->email }}</td>
                                     <td>
-                                        <button class="btn btn-info btn-show" data-url="{{route('account.show',['account'=>$account->id])  }}" onclick="showModal(event, '#accountShow')">Xem</button>
+                                        <button class="btn btn-info btn-show" data-url="{{ route('account.show', ['account' => $account->id]) }}" onclick="showModal(event, '#accountShow')">Xem</button>
                                         <button class="btn btn-warning btn-edit" 
                                                 data-url="{{ route('account.edit', ['account' => $account->id ]) }}" 
                                                 data-update="{{ route('account.update', ['account' => $account->id]) }}" 
@@ -65,5 +65,5 @@
     <script>
         $('#account').addClass('active');
     </script>
-    <script src="./dist/js/account.js"></script>
+    <script src="./dist/js/account_ajax.js"></script>
 @endsection
