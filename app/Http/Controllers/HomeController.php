@@ -5,16 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\User;
 use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class HomeController extends Controller
 {
+
+    public function checkGateEdit($user){
+        if(!Gate::allows('edit-info', $user)){
+            Toastr::error('Bạn không có quyền thực hiện thao tác này', 'Lỗi');
+            return false;
+        }
+        return true;
+    }
+
     public function index(){
         // if(Auth::user()->role_id == 1){
         //     $users = Member::join('users', 'account_id', 'users.id')
@@ -34,51 +43,48 @@ class HomeController extends Controller
             ->first();
             return view('shared.home', compact('user', $user)); 
         //}
-
     }
+
     public function changePassword(Request $request){
         $old_pass = Auth::user()->password;
-        $rules = [
-            'old_pass'=>'required',
-            'new_pass'=>'required|min:8|max:20|different:old_pass|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/',
-        ];
-        $messages =[
-            'old_pass.required'=>'Chưa nhập mật khẩu hiện tại',
-            'new_pass.required'=>'Chưa nhập mật khẩu mới',
-            'new_pass.min'=>'Mật khẩu có ít nhất 8 kí tự',
-            'new_pass.max'=>'Mật khẩu tối đa 20 kí tự',
-            'new_pass.diferent'=>'Mật khẩu mới không được trùng với mật khẩu cũ',
-            'new_pass.regex'=>'Mật khẩu phải có ít nhất 1 ký tự hoa, 1 ký tự thường và 1 số',
 
+        $rules = [
+            'old_pass' => 'required',
+            'new_pass' => 'required|min:8|max:20|different:old_pass|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/',
         ];
+
+        $messages = [
+            'old_pass.required' => 'Chưa nhập mật khẩu hiện tại',
+            'new_pass.required' => 'Chưa nhập mật khẩu mới',
+            'new_pass.min' => 'Mật khẩu ít nhất 8 kí tự',
+            'new_pass.max' => 'Mật khẩu tối đa 20 kí tự',
+            'new_pass.different' => 'Mật khẩu mới không được trùng với mật khẩu cũ',
+            'new_pass.regex' => 'Mật khẩu phải có ít nhất 1 kí tự hoa, 1 kí tự thường và 1 số',
+        ];
+
         $validator = Validator::make($request->all(), $rules, $messages);
         if($validator->fails()){
-            return response()->json(['error'=>$validator->errors()->toArray(), 'status' => 0]);
+            return response()->json(['error' => $validator->errors()->toArray(), 'status' => 0]);
         }
-        if(Hash::check($request->old_pass, $old_pass)){
+
+        if (Hash::check($request->old_pass, $old_pass)) {
             $change = User::find(Auth::id())->update([
-                'password'=>Hash::make($request->new_pass),
+                'password' => Hash::make($request->new_pass),
             ]);
-            if($change){
-                Toastr::success('Đổi Mật Khẩu Thành Công','Thành Công');
-                return response()->json(['status'=>1],200);
-            }else{
-                Toastr::error('Có lỗi xảy ra, thử lại sau','Thất bại');
-                return response()->json(['status'=>0]);
-                }
-            }else{
-                $error['old_pass']=['Mật khẩu không trùng khớp'];
-                return response()->json(['error'=>$error,'status'=>0]);
+    
+            if ($change) {
+                Toastr::success('Đổi mật khẩu thành công', 'Thành công');
+                return response()->json(['status' => 1]);
+            } else {
+                Toastr::error('Có lỗi xảy ra, thử lại sau', 'Thất bại');
+                return response()->json(['status' => 0]);
             }
-        
-    }
-    public function checkGateEdit($user){
-        if(!Gate::allows('edit-info',$user)){
-            Toastr::error('Bạn không có quyền thực hiện thao tác này','Lỗi');
-            return false;
+        } else {
+            $error['old_pass'] = ['Mật khẩu không trùng khớp'];
+            return response()->json(['error' => $error,'status' => 0 ]);
         }
-        return true;
     }
+
     public function editProfile($id){
         $user = Member::findOrFail($id);
 
@@ -88,7 +94,7 @@ class HomeController extends Controller
 
         $data = Member::select('id', 'name', 'date_of_birth', 'sex', 'address', 'phone', 'email')->find($id);
         if(!empty($data)){
-            return response()->json(['data' => $data, 'status' => 1], 200);
+            return response()->json(['data' => $data, 'status' => 1]);
         }
         else{
             Toastr::error('Có lỗi xảy ra, thử lại sau', 'Lỗi');
@@ -145,15 +151,17 @@ class HomeController extends Controller
 
 
         if($update){
+            LoginController::getSessionUser();
             Toastr::success('Cập nhật thông tin thành công', 'Thành công');
-            return response()->json(['status' => 1], 200);
+            return response()->json(['status' => 1]);
         }
         else{
             Toastr::error('Có lỗi xảy ra, thử lại sau', 'Thất bại');
             return response()->json(['status' => 0]);
         }
     }
-   public function editAvatar($id){
+    
+    public function editAvatar($id){
         $user = Member::findOrFail($id);
 
         if(!$this->checkGateEdit($user)){
@@ -171,6 +179,22 @@ class HomeController extends Controller
     }
 
     public function updateAvatar($id, Request $request){
+
+        $rules = [
+            'img' => 'required|image',
+        ];
+
+        $messages = [
+            'img.required' => 'Chưa chọn hình ảnh',
+            'img.image' => 'Avatar phải là file hình ảnh',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if($validator->fails()){
+            return response()->json(['error' => $validator->errors()->toArray(), 'status' => 0]);
+        }
+
         $image = $request->file('img');
 
         if($image){
@@ -197,8 +221,8 @@ class HomeController extends Controller
             }
         }
 
+        LoginController::getSessionUser();
         Toastr::success('Cập nhật thành công', 'Thành công');
-        return response()->json(['status' => 1], 200);
+        return response()->json(['status' => 1]);
     }
-    
 }

@@ -18,17 +18,13 @@ class AuthServiceProvider extends ServiceProvider
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     *
-     * @return void
-     */
+
     public function boot()
     {
         $this->registerPolicies();
-
-        Gate::define('edit-info', function(user $user, Member $member){  
-            return $user ->id === $member->account_id;
+        
+        Gate::define('edit-info', function(User $user, Member $member){
+            return $user->id === $member->account_id;
         });
     }
 }
