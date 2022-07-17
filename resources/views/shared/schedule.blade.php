@@ -3,21 +3,7 @@
 @section('title', 'Lịch họp tuần')
 
 @section('style')
-    <style>
-        thead td{
-            width: 12.5%;
-            text-align: center;
-        }
-
-        thead td span{
-            font-weight: normal;
-            font-size: 12px;
-        }
-
-        td{
-            border: 1px solid #f0f0f0;
-        }
-    </style>
+    <link rel="stylesheet" href="./dist/css/schedule.css">
 @endsection
 
 @section('content')
@@ -29,7 +15,7 @@
                         <table style="min-width: 1000px">
                             <thead>
                                 <tr>
-                                    <td></td>
+                                    <td>Phòng / Ngày</td>
                                     <td>Thứ 2 <br> <span>{{ date("d/m/Y", strtotime($dates[0])) }}</span></td>
                                     <td>Thứ 3 <br> <span>{{ date("d/m/Y", strtotime($dates[1])) }}</span></td>
                                     <td>Thứ 4 <br> <span>{{ date("d/m/Y", strtotime($dates[2])) }}</span></td>
@@ -49,7 +35,7 @@
                                         @for ($i = 0; $i<= 6; $i++)
                                             <td>
 
-                                                @foreach ($schedules[$room->id][$i] as $value)
+                                                @foreach ($schedules_1[$room->id][$i] as $value)
                                                     <strong>{{ date("H:i", strtotime($value->test_time)) }} - {{ date("H:i", strtotime($value->end_time)) }}</strong>
                                                     <br>{{ $value->meet_name }}<br>
                                                 @endforeach
@@ -59,10 +45,41 @@
  
                                     </tr>
                                 @endforeach
+
+                                <tr align="center">
+                                    <td>Phòng họp đơn vị</td>
+
+                                    @for ($i=0;$i<=6;$i++)
+                                        <td>
+                                            @foreach ($schedules_2[$i] as $value)
+                                                <strong>{{ date("H:i", strtotime($value->test_time)) }} - {{ date("H:i", strtotime($value->end_time)) }}</strong>
+                                                <br>{{ $value->meet_name }}<br>
+                                            @endforeach
+                                        </td>     
+                                    @endfor
+                                    
+                                </tr>
+
+                                <tr align="center">
+                                    <td>Jitsi Meet</td>
+
+                                    @for ($i=0;$i<=6;$i++)
+                                        <td>
+                                            @foreach ($schedules_3[$i] as $value)
+                                                <strong>{{ date("H:i", strtotime($value->test_time)) }} - {{ date("H:i", strtotime($value->end_time)) }}</strong>
+                                                <br>{{ $value->meet_name }}<br>
+                                            @endforeach
+                                        </td>     
+                                    @endfor
+                                    
+                                </tr>
                                 
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <div>
+                    <a class="btn btn-main ms-3 mb-3" href="{{ route('schedule.print') }}">Tải xuống</a>
                 </div>
             </div>
         </div>
